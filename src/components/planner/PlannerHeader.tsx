@@ -23,14 +23,16 @@ export default function PlannerHeader() {
       borderRadius="2xl">
           Planner
      </Text>
+     
     <Flex
       justify="space-between"
       align="center"
       bg="white"
-      px={6}
-      py={4}
+      px={4}
+      py={1}
       border="2px solid"
       borderColor="gray.200"
+      borderRadius="full"
     >
        
         <HStack spacing={5}>
