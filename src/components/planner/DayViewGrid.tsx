@@ -2,7 +2,7 @@
 "use client";
 
 import { Grid, Box, Text, Center } from "@chakra-ui/react";
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import dayjs from "dayjs";
 import { usePlanner } from "@/hooks/usePlanner";
 import ScheduleCard from "./ScheduleCard";
@@ -11,10 +11,21 @@ import { Schedule } from "@/types/schedule";
 const START_HOUR = 8;
 const END_HOUR = 18;
 const HOUR_HEIGHT = 80;
+const SNAP_MINUTES = 15;
 
 function timeToMinutes(time: string) {
   const [hour, minute] = time.split(":").map(Number);
   return hour * 60 + minute;
+}
+
+function minutesToTime(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return dayjs().hour(h).minute(m).format("HH:mm");
+}
+
+function snapToGrid(minutes: number) {
+  return Math.round(minutes / SNAP_MINUTES) * SNAP_MINUTES;
 }
 
 function calculatePosition(schedule: Schedule) {
@@ -31,45 +42,83 @@ function calculatePosition(schedule: Schedule) {
   return { top, height };
 }
 
-function getOverlappingGroups(schedules: Schedule[]) {
+function getCollisionColumns(schedules: Schedule[]) {
   const sorted = [...schedules].sort(
     (a, b) =>
       timeToMinutes(a.startTime) -
       timeToMinutes(b.startTime)
   );
 
-  const groups: Schedule[][] = [];
+  const columns: Schedule[][] = [];
 
-  sorted.forEach((schedule) => {
+  sorted.forEach((event) => {
     let placed = false;
 
-    for (const group of groups) {
-      const overlaps = group.some((existing) => {
-        const startA = timeToMinutes(schedule.startTime);
-        const endA = timeToMinutes(schedule.endTime);
-        const startB = timeToMinutes(existing.startTime);
-        const endB = timeToMinutes(existing.endTime);
+    for (const column of columns) {
+      const last = column[column.length - 1];
 
-        return startA < endB && endA > startB;
-      });
-
-      if (overlaps) {
-        group.push(schedule);
+      if (
+        timeToMinutes(event.startTime) >=
+        timeToMinutes(last.endTime)
+      ) {
+        column.push(event);
         placed = true;
         break;
       }
     }
 
     if (!placed) {
-      groups.push([schedule]);
+      columns.push([event]);
     }
   });
 
-  return groups;
+  return columns;
 }
 
 export default function DayViewGrid() {
-  const { schedulesForDay, currentDate } = usePlanner();
+  const {
+    schedulesForDay,
+    currentDate,
+    schedules,
+    updateScheduleTime,
+  } = usePlanner();
+
+  /* DRAG LOGIC */
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, delta } = event;
+
+    if (!delta.y) return;
+
+    const schedule = schedules.find(
+      (s) => s.id === active.id
+    );
+
+    if (!schedule) return;
+
+    const movedMinutes =
+      (delta.y / HOUR_HEIGHT) * 60;
+
+    const start = timeToMinutes(schedule.startTime);
+    const end = timeToMinutes(schedule.endTime);
+    const duration = end - start;
+
+    const snappedStart = snapToGrid(start + movedMinutes);
+
+    const newStart = Math.max(
+      START_HOUR * 60,
+      snappedStart
+    );
+
+    const newEnd = newStart + duration;
+
+    updateScheduleTime(
+      schedule.id,
+      minutesToTime(newStart),
+      minutesToTime(newEnd)
+    );
+  }
+
 
   const hours = Array.from(
     { length: END_HOUR - START_HOUR + 1 },
@@ -85,17 +134,11 @@ export default function DayViewGrid() {
     ((currentMinutes - dayStartMinutes) / 60) *
     HOUR_HEIGHT;
 
-  const overlappingGroups =
-    getOverlappingGroups(schedulesForDay);
+  const columns = getCollisionColumns(schedulesForDay);
 
   return (
-    <DndContext>
-      <Grid
-        templateColumns="80px 1fr"
-        flex="1"
-        bg="gray.50"
-        overflow="hidden"
-      >
+    <DndContext onDragEnd={handleDragEnd}>
+      <Grid templateColumns="80px 1fr" flex="1">
         {/* TIME COLUMN */}
         <Box
           bg="white"
@@ -121,13 +164,9 @@ export default function DayViewGrid() {
           ))}
         </Box>
 
-        {/* SCHEDULE GRID */}
-        <Box
-          position="relative"
-          overflowY="auto"
-          bg="white"
-        >
-          {/* Hour separator lines */}
+        {/* GRID */}
+        <Box position="relative" bg="white">
+          {/* Hour lines */}
           {hours.map((hour) => (
             <Box
               key={hour}
@@ -167,7 +206,7 @@ export default function DayViewGrid() {
             </>
           )}
 
-          {/* Empty State */}
+          {/* Empty state */}
           {schedulesForDay.length === 0 && (
             <Center
               position="absolute"
@@ -178,13 +217,14 @@ export default function DayViewGrid() {
             </Center>
           )}
 
-          {/* Render Overlapping Groups */}
-          {overlappingGroups.map((group) =>
-            group.map((schedule, index) => {
+          {/* Render events */}
+          {columns.map((column, colIndex) =>
+            column.map((schedule) => {
               const { top, height } =
                 calculatePosition(schedule);
+
               const widthPercent =
-                100 / group.length;
+                100 / columns.length;
 
               return (
                 <ScheduleCard
@@ -192,7 +232,9 @@ export default function DayViewGrid() {
                   schedule={schedule}
                   top={top}
                   height={height}
-                  left={`${index * widthPercent}%`}
+                  left={`${
+                    colIndex * widthPercent
+                  }%`}
                   width={`${widthPercent}%`}
                 />
               );

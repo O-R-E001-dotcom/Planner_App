@@ -3,11 +3,9 @@
 
 import {
   Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
+  Portal,
   Text,
+  Button,
 } from "@chakra-ui/react";
 import { Schedule } from "@/types/schedule";
 
@@ -23,18 +21,35 @@ export default function DetailsDrawer({
   schedule,
 }: Props) {
   return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerHeader>{schedule.title}</DrawerHeader>
-        <DrawerBody>
-          <Text>Doctor: {schedule.doctor}</Text>
-          <Text mt={2}>
-            Time: {schedule.startTime} - {schedule.endTime}
-          </Text>
-          <Text mt={2}>Date: {schedule.date}</Text>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+    <Drawer.Root open={isOpen} onOpenChange={onClose}>
+      <Portal>
+        <Drawer.Positioner>
+          <Drawer.Content>
+            <Drawer.Header>
+              {schedule.title}
+            </Drawer.Header>
+
+            <Drawer.Body>
+              <Text mb={2}>
+                Doctor: {schedule.doctor}
+              </Text>
+
+              <Text mb={2}>
+                Time: {schedule.startTime} -{" "}
+                {schedule.endTime}
+              </Text>
+
+              <Text mb={4}>
+                Type: {schedule.type}
+              </Text>
+
+              <Button onClick={onClose}>
+                Close
+              </Button>
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   );
 }
