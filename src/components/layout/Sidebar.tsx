@@ -63,7 +63,7 @@ export default function Sidebar() {
 
       <VStack align="stretch" spacing={2}>
         <NavItem label="Startpagina" icon={Home} />
-        <NavItem label="Roster" icon={Profile2User} />
+        <NavItem label="Rooster" icon={Profile2User} />
         <NavItem label="Planner" icon={Calendar} active />
         <NavItem label="Instellingen" icon={Setting2} />
         <NavItem label="My to do Protocols" icon={ClipboardText} />
