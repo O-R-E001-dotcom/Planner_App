@@ -1,13 +1,12 @@
 
-export type ViewMode = "live" | "plan";
-export type CalendarView = "day" | "month";
+export type ScheduleType = "surgery" | "specialist" | "finance";
 
 export interface Schedule {
   id: string;
   title: string;
   doctor: string;
-  startTime: string;
-  endTime: string;
-  date: string;
-  type: "surgery" | "specialist" | "finance";
+  date: string; // ISO date string (YYYY-MM-DD)
+  startTime: string; // "HH:mm"
+  endTime: string;   // "HH:mm"
+  type: ScheduleType;
 }

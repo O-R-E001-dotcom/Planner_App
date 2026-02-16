@@ -1,34 +1,17 @@
 
 "use client";
 
-import { useState } from "react";
-import dayjs from "dayjs";
-import { liveSchedules, plannedSchedules } from "@/data/mockSchedules";
-import { ViewMode, CalendarView } from "@/types/schedule";
+import { useContext } from "react";
+import { PlannerContext } from "@/context/PlannerContext";
 
 export function usePlanner() {
-  const [currentDate, setCurrentDate] = useState(dayjs());
-  const [mode, setMode] = useState<ViewMode>("live");
-  const [view, setView] = useState<CalendarView>("day");
+  const context = useContext(PlannerContext);
 
-  const schedules =
-    mode === "live" ? liveSchedules : plannedSchedules;
+  if (!context) {
+    throw new Error(
+      "usePlanner must be used within PlannerProvider"
+    );
+  }
 
-  const schedulesForDay = schedules.filter((s) =>
-    dayjs(s.date).isSame(currentDate, "day")
-  );
-
-  const nextDay = () => setCurrentDate((prev) => prev.add(1, "day"));
-  const prevDay = () => setCurrentDate((prev) => prev.subtract(1, "day"));
-
-  return {
-    currentDate,
-    mode,
-    view,
-    setMode,
-    setView,
-    schedulesForDay,
-    nextDay,
-    prevDay,
-  };
+  return context;
 }
