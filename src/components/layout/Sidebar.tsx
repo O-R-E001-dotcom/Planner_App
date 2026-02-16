@@ -66,7 +66,11 @@ export default function Sidebar() {
         <NavItem label="Roster" icon={Profile2User} />
         <NavItem label="Planner" icon={Calendar} active />
         <NavItem label="Instellingen" icon={Setting2} />
-        <NavItem label="Protocols" icon={ClipboardText} />
+        <NavItem label="My to do Protocols" icon={ClipboardText} />
+        <NavItem label="Document Management" icon={ClipboardText} />
+        <NavItem label="Department News" icon={ClipboardText} />
+        <NavItem label="Knowledge Base" icon={ClipboardText} />
+        <NavItem label="General News" icon={ClipboardText} />
       </VStack>
     </Box>
   );
