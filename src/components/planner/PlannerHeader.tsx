@@ -15,18 +15,24 @@ export default function PlannerHeader() {
   const { mode, setMode } = usePlanner();
 
   return (
+     <>
+     <Text fontSize="lg" fontWeight="semibold" px={10}
+      py={8}
+      border="2px solid"
+      borderColor="gray.200"
+      borderRadius="2xl">
+          Planner
+     </Text>
     <Flex
       justify="space-between"
       align="center"
       bg="white"
       px={6}
       py={4}
-      borderBottom="1px solid"
+      border="2px solid"
       borderColor="gray.200"
     >
-        <Text fontSize="lg" fontWeight="semibold">
-          Planner
-        </Text>
+       
         <HStack spacing={5}>
         <Button
           size="sm"
@@ -43,15 +49,22 @@ export default function PlannerHeader() {
           variant={mode === "plan" ? "solid" : "outline"}
           onClick={() => setMode("plan")}
         >
+          Planner
+        </Button>
+
+        <Button
+          size="sm"
+          borderRadius="full"
+          variant={mode === "planner" ? "solid" : "outline"}
+          onClick={() => setMode("planner")}
+        >
           Description of the planner view
         </Button>
 
         <Calendar size="20" />
       </HStack>
-
-      
-
       
     </Flex>
+     </>
   );
 }
