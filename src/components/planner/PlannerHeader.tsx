@@ -24,24 +24,13 @@ export default function PlannerHeader() {
       borderBottom="1px solid"
       borderColor="gray.200"
     >
-      <HStack spacing={4}>
-        <Badge
-          colorScheme={mode === "live" ? "red" : "gray"}
-          borderRadius="full"
-          px={3}
-          py={1}
-        >
-          {mode.toUpperCase()}
-        </Badge>
-
         <Text fontSize="lg" fontWeight="semibold">
           Planner
         </Text>
-      </HStack>
-
-      <HStack spacing={3}>
+        <HStack spacing={5}>
         <Button
           size="sm"
+          borderRadius="full"
           variant={mode === "live" ? "solid" : "outline"}
           onClick={() => setMode("live")}
         >
@@ -50,14 +39,19 @@ export default function PlannerHeader() {
 
         <Button
           size="sm"
+          borderRadius="full"
           variant={mode === "plan" ? "solid" : "outline"}
           onClick={() => setMode("plan")}
         >
-          Plan
+          Description of the planner view
         </Button>
 
         <Calendar size="20" />
       </HStack>
+
+      
+
+      
     </Flex>
   );
 }
